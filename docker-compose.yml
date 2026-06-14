@@ -1,0 +1,100 @@
+name: retailguard
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-retailguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-retailguard}
+      POSTGRES_DB: ${POSTGRES_DB:-retailguard}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/oltp/001_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-retailguard} -d ${POSTGRES_DB:-retailguard}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mock-api:
+    build:
+      context: .
+      dockerfile: docker/mock-api.Dockerfile
+    environment:
+      RETAILGUARD_DATA_ROOT: /app/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  pipeline:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: docker/pipeline.Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://retailguard:retailguard@postgres:5432/retailguard
+      MOCK_API_URL: http://mock-api:8000
+      RETAILGUARD_PROJECT_ROOT: /app
+      RETAILGUARD_DATA_ROOT: /app/data
+      PII_HASH_SALT: ${PII_HASH_SALT:-retailguard-demo-only}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-retailguard-data-platform}
+      GCP_LOCATION: ${GCP_LOCATION:-asia-southeast1}
+      GCS_BUCKET: ${GCS_BUCKET:-}
+      BIGQUERY_DATASET: ${BIGQUERY_DATASET:-retailguard}
+      BIGQUERY_MAXIMUM_BYTES_BILLED: ${BIGQUERY_MAXIMUM_BYTES_BILLED:-104857600}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mock-api:
+        condition: service_healthy
+
+  airflow:
+    profiles: ["airflow"]
+    build:
+      context: .
+      dockerfile: docker/airflow.Dockerfile
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      RETAILGUARD_AIRFLOW_RETRIES: ${RETAILGUARD_AIRFLOW_RETRIES:-2}
+      DATABASE_URL: postgresql+psycopg2://retailguard:retailguard@postgres:5432/retailguard
+      MOCK_API_URL: http://mock-api:8000
+      RETAILGUARD_PROJECT_ROOT: /opt/retailguard
+      RETAILGUARD_DATA_ROOT: /opt/retailguard/data
+      PII_HASH_SALT: ${PII_HASH_SALT:-retailguard-demo-only}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-retailguard-data-platform}
+      GCP_LOCATION: ${GCP_LOCATION:-asia-southeast1}
+      GCS_BUCKET: ${GCS_BUCKET:-}
+      BIGQUERY_DATASET: ${BIGQUERY_DATASET:-retailguard}
+      BIGQUERY_MAXIMUM_BYTES_BILLED: ${BIGQUERY_MAXIMUM_BYTES_BILLED:-104857600}
+    command: ["bash", "-c", "umask 0002 && exec airflow standalone"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - airflow_state:/opt/airflow
+      - ./airflow/dags:/opt/airflow/dags:ro
+      - ./airflow/logs:/opt/airflow/logs
+      - ./data:/opt/retailguard/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mock-api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  airflow_state:

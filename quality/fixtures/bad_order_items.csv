@@ -1,0 +1,2 @@
+order_item_id,order_id,product_id,quantity,unit_price,updated_at,line_amount
+BADITEM0001,ORD000001,PROD9999,-2,100.00,2026-06-01T00:00:00+00:00,-200.00

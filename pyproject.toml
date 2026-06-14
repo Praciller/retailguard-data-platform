@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "retailguard-data-platform"
+version = "0.1.0"
+description = "Privacy-aware retail data platform for the R2DE 3.0 portfolio"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+authors = [{ name = "Pakon Poomson" }]
+dependencies = [
+  "duckdb>=1.5,<1.6",
+  "fastapi>=0.115,<1",
+  "google-cloud-bigquery>=3.30,<4",
+  "google-cloud-storage>=3,<4",
+  "pandas>=2.2,<3",
+  "psycopg[binary]>=3.2,<4",
+  "pyarrow>=20,<24",
+  "pydantic-settings>=2.7,<3",
+  "requests>=2.32,<3",
+  "sqlalchemy>=1.4,<3",
+  "typer>=0.15,<1",
+  "uvicorn[standard]>=0.34,<1",
+]
+
+[project.optional-dependencies]
+spark = [
+  "pyspark==4.1.2",
+]
+dev = [
+  "pytest>=8.3,<10",
+  "pytest-cov>=6,<8",
+  "ruff>=0.9,<1",
+]
+
+[project.scripts]
+retailguard = "retailguard.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
