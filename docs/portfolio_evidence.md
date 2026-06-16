@@ -5,7 +5,7 @@
 Verified on 2026-06-17.
 
 Live dashboard:
-[RetailGuard Executive Dashboard](https://datastudio.google.com/u/5/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
+[RetailGuard Executive Dashboard](https://lookerstudio.google.com/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
 
 The dashboard was verified in Looker Studio view mode with these visible
 components:

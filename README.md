@@ -68,7 +68,7 @@ and Looker Studio.
 ## Live Dashboard
 
 Looker Studio report:
-[RetailGuard Executive Dashboard](https://datastudio.google.com/u/5/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
+[RetailGuard Executive Dashboard](https://lookerstudio.google.com/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
 
 Verified view-mode components:
 

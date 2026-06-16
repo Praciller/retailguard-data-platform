@@ -5,7 +5,7 @@
 Name: `RetailGuard Executive Dashboard`
 
 Live report:
-[https://datastudio.google.com/u/5/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F](https://datastudio.google.com/u/5/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
+[https://lookerstudio.google.com/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F](https://lookerstudio.google.com/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
 
 The report is a one-page executive view backed only by BigQuery serving views. It
 does not connect directly to Bronze or raw source tables.
