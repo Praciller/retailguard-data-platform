@@ -1,9 +1,31 @@
 # RetailGuard Data Platform
 
-Privacy-aware batch data platform built as a Road to Data Engineer 3.0 portfolio
-project. It demonstrates collection, incremental ingestion, PySpark transformation,
-data quality, orchestration, dimensional modelling, BigQuery serving, and Looker
-Studio reporting.
+[![CI](https://github.com/Praciller/retailguard-data-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Praciller/retailguard-data-platform/actions/workflows/ci.yml)
+
+End-to-end retail data engineering platform built for the Road to Data Engineer
+3.0 portfolio. It collects operational and campaign data, runs incremental
+Bronze extraction, transforms protected Silver datasets with PySpark, blocks bad
+loads with quality gates, publishes a dimensional model to BigQuery, and serves
+executive metrics in Looker Studio.
+
+## Portfolio Snapshot
+
+| Area | Evidence |
+|---|---|
+| Pipeline scope | PostgreSQL + FastAPI sources to Bronze, Silver, DuckDB, BigQuery, and Looker Studio |
+| Privacy controls | Raw names, email, address, and phone are removed before Silver; email is hashed and phone is masked |
+| Quality gate | Duplicate keys, orphan records, invalid amounts, reconciliation drift, low volume, and raw PII block the load |
+| Orchestration | Airflow 3 DAG with daily schedule, retries, and task boundaries |
+| Cloud serving | Private Cloud Storage, BigQuery star schema, serving views, and Looker Studio dashboard |
+| Cost posture | Manual cloud publish, 100 MiB BigQuery query cap, THB 90 budget, no cloud compute services |
+
+## What This Proves
+
+- I can design a warehouse-oriented data platform beyond a notebook or single script.
+- I can make pipeline runs idempotent with watermarks, deterministic fixtures, and stable fact keys.
+- I can enforce privacy and quality before data reaches analytics consumers.
+- I can publish verified serving views to BigQuery without leaving expensive cloud services running.
+- I can connect warehouse outputs to an executive dashboard and document reproducible evidence.
 
 ## Architecture
 
