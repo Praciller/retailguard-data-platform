@@ -53,6 +53,7 @@ Verified view-mode components:
 - revenue scorecard: 1,575,759
 - orders scorecard: 479
 - units scorecard: 3,005
+- average order value scorecard: 3,289.68
 - daily revenue time series by `calendar_date`
 
 ## Quick Start
@@ -137,6 +138,7 @@ A Google Cloud budget sends alerts; it does not stop resources. See
 - [Data Dictionary](docs/data_dictionary.md)
 - [PII Policy](docs/pii_policy.md)
 - [Dashboard Specification](docs/dashboard.md)
+- [Portfolio Evidence](docs/portfolio_evidence.md)
 - [Operations Runbook](docs/runbook.md)
 - [Cloud Cost Guardrails](docs/cloud_cost_guardrails.md)
 
