@@ -4,10 +4,29 @@
 
 Name: `RetailGuard Executive Dashboard`
 
+Live report:
+[https://datastudio.google.com/u/5/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F](https://datastudio.google.com/u/5/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
+
 The report is a one-page executive view backed only by BigQuery serving views. It
 does not connect directly to Bronze or raw source tables.
 
-## Components
+## Implemented Components
+
+Verified in Looker Studio view mode on 2026-06-16:
+
+| Component | BigQuery view | Dimensions | Metrics |
+|---|---|---|---|
+| Revenue scorecard | `vw_daily_sales` | None | `revenue` |
+| Orders scorecard | `vw_daily_sales` | None | `orders` |
+| Units scorecard | `vw_daily_sales` | None | `units` |
+| Daily revenue time series | `vw_daily_sales` | `calendar_date` | `revenue` |
+
+The AOV scorecard is intentionally not included in the current live report. In
+Looker Studio, the `average_order_value` field from `vw_daily_sales` defaults to a
+SUM aggregation, which is not a valid executive AOV. Add AOV either from
+`vw_executive_summary` or as a calculated metric `SUM(revenue) / SUM(orders)`.
+
+## Target Components
 
 | Component | BigQuery view | Dimensions | Metrics |
 |---|---|---|---|

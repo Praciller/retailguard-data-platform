@@ -43,6 +43,18 @@ and Looker Studio.
 - Airflow 3 DAG with retries, daily scheduling, and task-level observability.
 - Idempotency acceptance test proves a second run creates no duplicate facts.
 
+## Live Dashboard
+
+Looker Studio report:
+[RetailGuard Executive Dashboard](https://datastudio.google.com/u/5/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
+
+Verified view-mode components:
+
+- revenue scorecard: 1,575,759
+- orders scorecard: 479
+- units scorecard: 3,005
+- daily revenue time series by `calendar_date`
+
 ## Quick Start
 
 Requirements: Docker Desktop and Docker Compose.

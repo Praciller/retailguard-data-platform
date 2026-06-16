@@ -7,11 +7,13 @@
 | Project | `retailguard-data-platform` |
 | Region | `asia-southeast1` |
 | Monthly budget | THB 90 |
+| Budget name | `RetailGuard gross cost guardrail` |
 | Budget basis | Gross cost before credits |
 | Alerts | 25%, 50%, 75%, 90%, 100% |
 | BigQuery per-query cap | 100 MiB billed |
 | GCS lifecycle | Delete objects after 30 days |
 | Cloud compute | None |
+| Free Trial status | Active; expires September 13, 2026 |
 
 The project uses only Cloud Storage, BigQuery, and Looker Studio. PostgreSQL,
 PySpark, DuckDB, and Airflow run locally.
