@@ -2,105 +2,94 @@
 
 [![CI](https://github.com/Praciller/retailguard-data-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Praciller/retailguard-data-platform/actions/workflows/ci.yml)
 
-End-to-end retail data engineering platform built for the Road to Data Engineer
-3.0 portfolio. It collects operational and campaign data, runs incremental
-Bronze extraction, transforms protected Silver datasets with PySpark, blocks bad
-loads with quality gates, publishes a dimensional model to BigQuery, and serves
-executive metrics in Looker Studio.
+A privacy-aware retail data platform that turns deterministic PostgreSQL and
+FastAPI sources into incremental Bronze Parquet, protected PySpark Silver data,
+blocking quality evidence, and a DuckDB star schema.
+
+The default portfolio review is fully local and requires no cloud account,
+billing account, free trial, or hosted service.
 
 ## Portfolio Snapshot
 
-| Area | Evidence |
+| Area | Local evidence |
 |---|---|
-| Pipeline scope | PostgreSQL + FastAPI sources to Bronze, Silver, DuckDB, BigQuery, and Looker Studio |
-| Privacy controls | Raw names, email, address, and phone are removed before Silver; email is hashed and phone is masked |
-| Quality gate | Duplicate keys, orphan records, invalid amounts, reconciliation drift, low volume, and raw PII block the load |
-| Orchestration | Airflow 3 DAG with daily schedule, retries, and task boundaries |
-| Cloud serving | Private Cloud Storage, BigQuery star schema, serving views, and Looker Studio dashboard |
-| Cost posture | Manual cloud publish, 100 MiB BigQuery query cap, THB 90 budget, no cloud compute services |
-
-## What This Proves
-
-- I can design a warehouse-oriented data platform beyond a notebook or single script.
-- I can make pipeline runs idempotent with watermarks, deterministic fixtures, and stable fact keys.
-- I can enforce privacy and quality before data reaches analytics consumers.
-- I can publish verified serving views to BigQuery without leaving expensive cloud services running.
-- I can connect warehouse outputs to an executive dashboard and document reproducible evidence.
+| Pipeline | PostgreSQL + FastAPI -> Bronze -> PySpark Silver -> quality gate -> DuckDB |
+| Privacy | Raw name, email, address, and phone are removed before Silver; email is hashed and phone is masked |
+| Quality | Keys, values, relationships, reconciliation, volume, and raw PII are blocking checks |
+| Warehouse | DuckDB dimensions, facts, and five serving views |
+| Reliability | Watermarks, stable fact keys, two-run idempotency proof, and a deliberately failing fixture |
+| Review artifact | Generated Markdown report at `data/evidence/local_portfolio_report.md` |
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     PG["PostgreSQL OLTP"] --> EX["Incremental extract"]
-    API["Campaign API"] --> EX
+    API["FastAPI campaign source"] --> EX
     EX --> BR["Bronze Parquet"]
     BR --> SP["PySpark transform"]
     SP --> SI["Protected Silver Parquet"]
     SI --> Q{"Blocking quality gate"}
     Q -->|pass| DU["DuckDB star schema"]
-    Q -->|pass, opt-in| GCS["Private Cloud Storage"]
-    GCS --> BQ["BigQuery star schema + views"]
-    BQ --> LS["Looker Studio dashboard"]
+    DU --> EV["Local Markdown evidence"]
     Q -->|fail| STOP["Stop load"]
-    AF["Airflow 3"] -. orchestrates .-> EX
-    AF -. orchestrates .-> SP
-    AF -. orchestrates .-> Q
-    AF -. orchestrates .-> DU
+    Q -.->|manual opt-in only| CL["Optional GCS / BigQuery / Looker"]
+    AF["Airflow 3"] -. orchestrates local path .-> EX
 ```
 
-Local compute is the default. Google Cloud is limited to Cloud Storage, BigQuery,
-and Looker Studio.
+Default review path:
 
-## Project Evidence
+```text
+Synthetic sources -> Bronze -> PySpark Silver -> quality gate
+-> DuckDB warehouse/star schema -> local evidence report
+```
 
-- Deterministic source data: 100 customers, 50 products, 500 orders, 1,250 order
-  items, 500 payments, and 300 campaign events.
-- Incremental Bronze extraction with per-source watermarks.
-- PySpark Silver transformations with deduplication, typed fields, hashed email,
-  masked phone, and removal of raw name, email, address, and phone.
-- Blocking checks for required keys, uniqueness, business values, positive amounts,
-  referential integrity, payment reconciliation, minimum volume, and raw PII.
-- A tracked bad-data fixture proves the gate stops the warehouse load.
-- DuckDB and BigQuery star schemas with reconciled facts and dashboard views.
-- Airflow 3 DAG with retries, daily scheduling, and task-level observability.
-- Idempotency acceptance test proves a second run creates no duplicate facts.
+## Zero-Cost Quickstart
 
-## Live Dashboard
-
-Looker Studio report:
-[RetailGuard Executive Dashboard](https://lookerstudio.google.com/reporting/8e913aa6-d7c0-4367-991d-c173c8f05abb/page/2pS1F)
-
-Verified view-mode components:
-
-- revenue scorecard: 1,575,759
-- orders scorecard: 479
-- units scorecard: 3,005
-- average order value scorecard: 3,289.68
-- daily revenue time series by `calendar_date`
-
-## Quick Start
-
-Requirements: Docker Desktop and Docker Compose.
+Requirements: Docker Desktop with Docker Compose. `.env` is not required for the
+local demo.
 
 ```powershell
-Copy-Item .env.example .env
 docker compose up -d postgres mock-api
 docker compose --profile tools build pipeline
 docker compose --profile tools run --rm pipeline demo
+Get-Content .\data\evidence\local_portfolio_report.md
 ```
 
-The `demo` command resets synthetic source data, runs the pipeline twice, checks
-warehouse idempotency, and injects the failing quality fixture.
+`retailguard demo` resets and seeds deterministic sources, runs the local pipeline
+twice, verifies warehouse idempotency, proves the bad fixture is blocked, and writes
+the reviewer-facing report. It has no cloud call in its execution path.
 
-Start Airflow:
+Expected source volume:
+
+| Dataset | Rows |
+|---|---:|
+| customers | 100 |
+| products | 50 |
+| orders | 500 |
+| order items | 1,250 |
+| payments | 500 |
+| campaign events | 300 |
+
+## Review in Under 10 Minutes
+
+1. Run the four quickstart commands.
+2. Confirm the demo JSON ends with `"status": "passed"` and includes
+   `local_evidence`.
+3. Open `data/evidence/local_portfolio_report.md` for KPIs, quality checks,
+   privacy controls, reconciliation, idempotency, layer counts, and DuckDB objects.
+4. Optionally inspect the warehouse directly:
 
 ```powershell
-docker compose --profile airflow up -d airflow
-docker compose --profile airflow exec airflow airflow dags list
+@'
+import duckdb
+db = "data/warehouse/retailguard.duckdb"
+print(duckdb.connect(db, read_only=True).sql("SELECT * FROM vw_daily_sales LIMIT 5"))
+'@ | .\.venv\Scripts\python.exe -
 ```
 
-Open [http://localhost:8080](http://localhost:8080). The DAG is
-`retailguard_pipeline` and is paused by default on first startup.
+See [Portfolio Review](docs/portfolio_review.md) and
+[Local Demo](docs/local_demo.md) for expected evidence and troubleshooting.
 
 ## Local Development
 
@@ -113,64 +102,52 @@ python -m pip install -e ".[dev,spark]"
 retailguard --help
 retailguard demo
 python -m ruff check src tests
-python -m pytest
+python -m pytest --basetemp=.pytest-tmp
+docker compose config --quiet
 ```
 
-## Cloud Publish
+## Airflow
 
-Cloud publishing is intentionally excluded from the scheduled Airflow DAG. It is an
-explicit operation after the local quality gate passes.
+Airflow orchestrates only the local extract, transform, quality, and DuckDB load.
+Cloud publication is not part of the DAG.
 
 ```powershell
-gcloud auth login
-gcloud auth application-default login
-gcloud config set project retailguard-data-platform
-gcloud services enable bigquery.googleapis.com storage.googleapis.com
-
-retailguard cloud-plan
-retailguard publish-cloud
-retailguard cloud-status
+docker compose --profile airflow up -d airflow
+docker compose --profile airflow exec airflow airflow dags list
 ```
 
-The publisher:
+Open [http://localhost:8080](http://localhost:8080). The DAG is
+`retailguard_pipeline` and is paused on first startup.
 
-- creates a private regional bucket with uniform access and public access prevention;
-- deletes bucket objects after 30 days;
-- uploads only protected Silver Parquet;
-- loads six Silver tables with `WRITE_TRUNCATE`;
-- creates dimensions, facts, and five Looker-ready views;
-- caps each BigQuery query at 100 MiB billed;
-- verifies unique sales facts and revenue reconciliation.
+## Optional Cloud Publish
 
-## Cost Controls
+The existing GCS, BigQuery, and Looker Studio path remains available as a manual,
+opt-in extension. It is not required for portfolio review and may incur cost.
+Cloud destination values are blank in `.env.example`; the local demo, Airflow DAG,
+and CI never invoke `publish-cloud`.
 
-- Monthly gross-cost budget: THB 90, excluding credits.
-- Alert thresholds: 25%, 50%, 75%, 90%, and 100%.
-- BigQuery maximum bytes billed per query: 100 MiB.
-- No Compute Engine, Cloud SQL, Dataproc, Dataflow, or Cloud Composer.
-- Cloud publishing is manual and the data volume is under 100 KiB.
-- The billing account must remain in Free Trial and must not be upgraded.
-
-A Google Cloud budget sends alerts; it does not stop resources. See
-[Cloud Cost Guardrails](docs/cloud_cost_guardrails.md) for the shutdown procedure.
+See [Optional Cloud Publish](docs/cloud_optional.md). Historical cloud/dashboard
+evidence remains documented in [Portfolio Evidence](docs/portfolio_evidence.md) and
+[Dashboard](docs/dashboard.md).
 
 ## Documentation
 
+- [Portfolio Review](docs/portfolio_review.md)
+- [Local Demo](docs/local_demo.md)
 - [Architecture](docs/architecture.md)
 - [Data Dictionary](docs/data_dictionary.md)
 - [PII Policy](docs/pii_policy.md)
-- [Dashboard Specification](docs/dashboard.md)
-- [Portfolio Evidence](docs/portfolio_evidence.md)
 - [Operations Runbook](docs/runbook.md)
-- [Cloud Cost Guardrails](docs/cloud_cost_guardrails.md)
+- [Optional Cloud Publish](docs/cloud_optional.md)
 
 ## Repository Layout
 
 ```text
-airflow/dags/       Airflow orchestration
-docker/             Reproducible service images
+airflow/dags/       Local Airflow orchestration
+docker/             Reproducible local service images
+docs/               Reviewer, operations, and optional cloud documentation
 quality/fixtures/   Deliberately invalid acceptance data
 sql/oltp/           PostgreSQL source schema
-src/retailguard/    Pipeline, quality, warehouse, and cloud publisher
+src/retailguard/    Pipeline, quality, warehouse, evidence, and optional cloud code
 tests/              Contract and regression tests
 ```

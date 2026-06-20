@@ -12,6 +12,7 @@ docker compose ps
 ```powershell
 docker compose --profile tools build pipeline
 docker compose --profile tools run --rm pipeline demo
+Get-Content .\data\evidence\local_portfolio_report.md
 ```
 
 Pass criteria:
@@ -32,27 +33,11 @@ docker compose --profile airflow exec airflow airflow dags list-import-errors
 docker compose --profile airflow exec airflow airflow dags test retailguard_pipeline 2026-06-14
 ```
 
-## Publish Cloud
+## Optional Cloud Publish
 
-```powershell
-gcloud auth login
-gcloud auth application-default login
-gcloud config set project retailguard-data-platform
-gcloud services enable bigquery.googleapis.com storage.googleapis.com
-
-retailguard cloud-plan
-retailguard publish-cloud
-retailguard cloud-status
-```
-
-Never run cloud publication after a failed quality report.
-
-## Verify BigQuery
-
-```powershell
-bq --location=asia-southeast1 query --use_legacy_sql=false --maximum_bytes_billed=104857600 `
-  "SELECT * FROM \`retailguard-data-platform.retailguard.vw_executive_summary\`"
-```
+Cloud publication is not required for operations or portfolio review. Follow
+[Optional Cloud Publish](cloud_optional.md) only when intentionally exercising
+that extension. Never publish after a failed quality report.
 
 ## Stop Local Services
 

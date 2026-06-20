@@ -1,5 +1,8 @@
 # Cloud Cost Guardrails
 
+> Optional cloud extension only. These controls are not part of the zero-cost
+> local demo or required portfolio review path.
+
 ## Active Guardrails
 
 | Control | Value |

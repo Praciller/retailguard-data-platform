@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 .venv/
 build/
 *.egg-info/
@@ -6,6 +8,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.pytest-tmp/
 .coverage
 htmlcov/
 
@@ -14,10 +17,26 @@ data/silver/
 data/state/
 data/warehouse/
 data/quality/
+data/evidence/
 data/wheel-check/
 airflow/logs/
 airflow/airflow.db
 airflow/standalone_admin_password.txt
+.sparkStaging/
+spark-warehouse/
+metastore_db/
+derby.log
+
+*.duckdb
+*.duckdb.wal
+*.db
+*.sqlite
+*.sqlite3
+credentials.json
+*-credentials.json
+*service-account*.json
+application_default_credentials.json
+.config/gcloud/
 
 *.log
 .DS_Store

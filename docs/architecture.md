@@ -2,11 +2,11 @@
 
 ## Design Goals
 
-1. Demonstrate the complete R2DE lifecycle without a permanently running cloud
-   compute service.
+1. Demonstrate the complete R2DE lifecycle locally without a cloud account,
+   billing account, or free trial.
 2. Stop data with broken keys, relationships, amounts, or privacy controls before it
    reaches a serving warehouse.
-3. Keep every local run reproducible and every cloud operation small, explicit, and
+3. Keep every local run reproducible and any optional cloud operation explicit and
    removable.
 
 ## Data Flow
@@ -20,9 +20,9 @@
 | Quality | DuckDB SQL | Blocking cross-table and privacy checks |
 | Local warehouse | DuckDB | Dimensions, facts, reconciliation, and serving views |
 | Orchestration | Airflow 3 | Daily task dependencies, retries, and observability |
-| Cloud lake | Cloud Storage | Private protected Silver files with 30-day lifecycle |
-| Cloud warehouse | BigQuery | Silver tables, dimensional model, and serving views |
-| BI | Looker Studio | Executive sales, customer, product, and campaign dashboard |
+| Local evidence | Markdown | KPIs, quality, privacy, reconciliation, idempotency, and row counts |
+| Optional cloud lake | Cloud Storage | Manual protected Silver publication |
+| Optional cloud warehouse/BI | BigQuery + Looker Studio | Archived extension path |
 
 ## Incremental Contract
 
@@ -40,8 +40,9 @@ The quality task is upstream of both warehouse loads. Any blocking failure raise
 error and prevents DuckDB or cloud publication. The tracked fixture deliberately
 adds duplicate, orphaned, and invalid order-item data to prove this boundary.
 
-## Cloud Boundary
+## Optional Cloud Boundary
 
 Airflow stops at the local DuckDB warehouse. `retailguard publish-cloud` is a manual
 promotion command. This prevents retries or schedules from causing unexpected cloud
-queries and keeps cost ownership explicit.
+queries and keeps cost ownership explicit. Blank cloud destination values are the
+documented default.

@@ -25,11 +25,12 @@ The customer transformation applies these controls:
 The blocking quality gate inspects the Silver schema and fails when `full_name`,
 `email`, `phone`, or `address` is present.
 
-## Cloud
+## Optional Cloud
 
 Only Silver Parquet is uploaded. The bucket enforces uniform bucket-level access and
 public access prevention. Objects expire after 30 days. No service-account keys or
-credentials are stored in the repository.
+credentials are stored in the repository. Cloud publication is not required for the
+default review path.
 
 ## Salt
 

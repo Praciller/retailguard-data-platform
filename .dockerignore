@@ -1,4 +1,6 @@
 .git
+.env
+.env.*
 .venv
 build
 __pycache__
@@ -9,3 +11,9 @@ data
 airflow/logs
 *.pyc
 *.log
+*.duckdb
+*.db
+credentials.json
+*-credentials.json
+*service-account*.json
+application_default_credentials.json

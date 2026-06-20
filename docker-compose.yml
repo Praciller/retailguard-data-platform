@@ -49,7 +49,7 @@ services:
       RETAILGUARD_PROJECT_ROOT: /app
       RETAILGUARD_DATA_ROOT: /app/data
       PII_HASH_SALT: ${PII_HASH_SALT:-retailguard-demo-only}
-      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-retailguard-data-platform}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-}
       GCP_LOCATION: ${GCP_LOCATION:-asia-southeast1}
       GCS_BUCKET: ${GCS_BUCKET:-}
       BIGQUERY_DATASET: ${BIGQUERY_DATASET:-retailguard}
@@ -76,7 +76,7 @@ services:
       RETAILGUARD_PROJECT_ROOT: /opt/retailguard
       RETAILGUARD_DATA_ROOT: /opt/retailguard/data
       PII_HASH_SALT: ${PII_HASH_SALT:-retailguard-demo-only}
-      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-retailguard-data-platform}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-}
       GCP_LOCATION: ${GCP_LOCATION:-asia-southeast1}
       GCS_BUCKET: ${GCS_BUCKET:-}
       BIGQUERY_DATASET: ${BIGQUERY_DATASET:-retailguard}

@@ -7,7 +7,6 @@ from typing import Any
 
 import typer
 
-from retailguard.cloud import cloud_plan, cloud_status, publish_cloud
 from retailguard.config import get_settings
 from retailguard.db import (
     apply_schema,
@@ -20,7 +19,11 @@ from retailguard.extract import extract_all, new_run_id, reset_ingestion_state
 from retailguard.paths import DataPaths
 from retailguard.quality import QualityGateError, run_quality_gate
 from retailguard.transform import transform_bronze_to_silver
-from retailguard.warehouse import load_duckdb_warehouse, warehouse_metrics
+from retailguard.warehouse import (
+    load_duckdb_warehouse,
+    warehouse_metrics,
+    write_local_evidence_report,
+)
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -166,26 +169,26 @@ def demo(reset_data: bool = True) -> None:
     if bad_report["status"] != "failed":
         raise RuntimeError("Bad-data fixture did not fail the quality gate.")
 
-    _print(
-        {
-            "status": "passed",
-            "seeded": seeded,
-            "source_counts": source_counts(engine),
-            "first_run": first,
-            "second_run": second,
-            "idempotency": {
-                "first_fact_rows": first_metrics["fact_sales_rows"],
-                "second_fact_rows": second_metrics["fact_sales_rows"],
-                "distinct_sales_keys": second_metrics["distinct_sales_keys"],
-                "passed": True,
-            },
-            "bad_data_gate": {
-                "status": bad_report["status"],
-                "blocking_failures": bad_report["blocking_failures"],
-                "warehouse_load_attempted": False,
-            },
-        }
-    )
+    result = {
+        "status": "passed",
+        "seeded": seeded,
+        "source_counts": source_counts(engine),
+        "first_run": first,
+        "second_run": second,
+        "idempotency": {
+            "first_fact_rows": first_metrics["fact_sales_rows"],
+            "second_fact_rows": second_metrics["fact_sales_rows"],
+            "distinct_sales_keys": second_metrics["distinct_sales_keys"],
+            "passed": True,
+        },
+        "bad_data_gate": {
+            "status": bad_report["status"],
+            "blocking_failures": bad_report["blocking_failures"],
+            "warehouse_load_attempted": False,
+        },
+    }
+    result["local_evidence"] = str(write_local_evidence_report(paths, result))
+    _print(result)
 
 
 @app.command()
@@ -203,6 +206,8 @@ def status() -> None:
 @app.command("cloud-plan")
 def cloud_plan_cmd() -> None:
     """Show the protected cloud publish plan without making changes."""
+    from retailguard.cloud import cloud_plan
+
     settings, paths, _ = _context()
     _print(cloud_plan(settings, paths))
 
@@ -210,6 +215,8 @@ def cloud_plan_cmd() -> None:
 @app.command("publish-cloud")
 def publish_cloud_cmd() -> None:
     """Publish protected Silver data and serving views to GCS and BigQuery."""
+    from retailguard.cloud import publish_cloud
+
     settings, paths, _ = _context()
     _print(publish_cloud(settings, paths))
 
@@ -217,6 +224,8 @@ def publish_cloud_cmd() -> None:
 @app.command("cloud-status")
 def cloud_status_cmd() -> None:
     """Show whether the configured GCS bucket and BigQuery dataset exist."""
+    from retailguard.cloud import cloud_status
+
     settings, _, _ = _context()
     _print(cloud_status(settings))
 

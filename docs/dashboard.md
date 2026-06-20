@@ -1,5 +1,8 @@
 # Dashboard Specification
 
+> Archived optional cloud evidence. The default portfolio review uses the local
+> DuckDB-backed Markdown report and does not require Looker Studio.
+
 ## Report
 
 Name: `RetailGuard Executive Dashboard`
